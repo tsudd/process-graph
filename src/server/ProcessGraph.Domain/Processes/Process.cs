@@ -2,24 +2,32 @@ using ProcessGraph.Domain.Abstractions;
 
 namespace ProcessGraph.Domain.Processes;
 
-public sealed class Process(
-    string name,
-    string description,
-    ProcessSettings settings,
-    DateTime createdAt,
-    DateTime lastModifiedAt,
-    Graph graph,
-    ProcessTotals totals,
-    ProcessStatus status
-) : Entity
+public sealed class Process : Entity
 {
-    public string Name { get; private set; } = name;
-    public string Description { get; private set; } = description;
-    public ProcessSettings Settings { get; private set; } = settings;
-    public ProcessStatus Status { get; private set; } = status;
-    public DateTime CreatedAt { get; private set; } = createdAt;
-    public DateTime LastModifiedAt { get; private set; } = lastModifiedAt;
-    public Graph Graph { get; private set; } = graph;
-    public ProcessTotals Totals { get; private set; } = totals;
-}
+    public string Name { get; private set; }
+    public string Description { get; private set; }
+    public ProcessSettings Settings { get; private set; }
+    public ProcessStatus Status { get; private set; }
+    public Graph Graph { get; private set; }
+    public ProcessTotals Totals { get; private set; }
 
+    public static Process Create(
+        string name,
+        string description,
+        ProcessSettings settings,
+        Graph graph
+    )
+    {
+        return new Process
+        {
+            Id = Guid.NewGuid(),
+            CreatedAt = DateTime.UtcNow,
+            Name = name,
+            Description = description,
+            Settings = settings,
+            Status = ProcessStatus.NotStarted,
+            Graph = graph,
+            Totals = ProcessTotals.GetDefault(settings.Unit),
+        };
+    }
+}
