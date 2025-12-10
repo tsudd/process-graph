@@ -1,6 +1,8 @@
-﻿namespace ProcessGraph.Application.Abstractions.Pipeline;
+﻿using FluentResults;
 
-public interface IRequestHandler<TRequest, TResponse>
+namespace ProcessGraph.Application.Abstractions.Pipeline;
+
+public interface IRequestHandler<in TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default);

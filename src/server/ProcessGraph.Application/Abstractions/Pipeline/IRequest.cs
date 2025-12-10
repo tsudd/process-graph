@@ -1,3 +1,3 @@
 ﻿namespace ProcessGraph.Application.Abstractions.Pipeline;
 
-public interface IRequest<TResponse>;
+public interface IRequest<out TResponse>;

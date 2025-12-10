@@ -1,9 +1,12 @@
-﻿namespace ProcessGraph.Application.Abstractions.Pipeline;
+﻿using FluentResults;
 
-public interface IRequestPipeline
+namespace ProcessGraph.Application.Abstractions.Pipeline;
+
+public interface IRequestPipeline<in TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
 {
-    Task<TResponse> ExecuteAsync<TResponse>(
-        IRequest<TResponse> request,
+    Task<TResponse> ExecuteAsync(
+        TRequest request,
         CancellationToken cancellationToken = default
     );
 }
