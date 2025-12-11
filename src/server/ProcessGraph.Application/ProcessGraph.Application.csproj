@@ -9,4 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ProcessGraph.Domain\ProcessGraph.Domain.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+  </ItemGroup>
 </Project>
