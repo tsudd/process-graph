@@ -1,4 +1,10 @@
 namespace ProcessGraph.Domain.Processes;
 
-public record ProcessSettings(UnitOfMeasure Unit);
+public sealed record ProcessSettings(UnitOfMeasure Unit)
+{
+    public static ProcessSettings CreateDefault()
+    {
+        return new ProcessSettings(UnitOfMeasure.Days);
+    }
+}
 
