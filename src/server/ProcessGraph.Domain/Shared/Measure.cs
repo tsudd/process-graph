@@ -1,6 +1,8 @@
-namespace ProcessGraph.Domain.Processes;
+using ProcessGraph.Domain.Processes;
 
-public record Measure(int Value, UnitOfMeasure Unit)
+namespace ProcessGraph.Domain.Shared;
+
+public sealed record Measure(int Value, UnitOfMeasure Unit)
 {
     public static Measure operator +(Measure first, Measure second)
     {

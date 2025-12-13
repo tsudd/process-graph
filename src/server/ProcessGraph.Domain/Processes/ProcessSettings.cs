@@ -1,3 +1,5 @@
+using ProcessGraph.Domain.Shared;
+
 namespace ProcessGraph.Domain.Processes;
 
 public sealed record ProcessSettings(UnitOfMeasure Unit)

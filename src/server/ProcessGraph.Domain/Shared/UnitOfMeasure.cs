@@ -1,4 +1,4 @@
-namespace ProcessGraph.Domain.Processes;
+namespace ProcessGraph.Domain.Shared;
 
 public record UnitOfMeasure
 {
@@ -17,5 +17,9 @@ public record UnitOfMeasure
     }
 
     public static readonly IReadOnlyCollection<UnitOfMeasure> All = [Points, Days, Weeks];
+    public override string ToString()
+    {
+        return Unit;
+    }
 }
 

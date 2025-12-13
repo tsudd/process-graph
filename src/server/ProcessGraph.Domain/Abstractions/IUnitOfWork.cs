@@ -1,4 +1,4 @@
-﻿namespace ProcessGraph.Domain;
+﻿namespace ProcessGraph.Domain.Abstractions;
 
 public interface IUnitOfWork
 {
