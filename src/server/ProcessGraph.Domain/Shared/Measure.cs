@@ -1,5 +1,3 @@
-using ProcessGraph.Domain.Processes;
-
 namespace ProcessGraph.Domain.Shared;
 
 public sealed record Measure(int Value, UnitOfMeasure Unit)
