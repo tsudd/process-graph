@@ -13,13 +13,12 @@ public sealed class GetProcessHandler(IProcessRepository processRepository)
     public async Task<Result<GetProcessDto>> HandleAsync(GetProcess request,
         CancellationToken cancellationToken = default)
     {
-        var getProcess = await processRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (getProcess.IsFailed)
+        var process = await processRepository.GetByIdAsync(request.Id, cancellationToken);
+        if (process == null)
         {
-            return getProcess.ToResult<GetProcessDto>();
+            return Result.Fail($"Process with ID {request.Id} not found.");
         }
 
-        var process = getProcess.Value;
         // TODO: Map using AutoMapper
         var dto = new GetProcessDto(
             process.Id,

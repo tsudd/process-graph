@@ -16,24 +16,22 @@ public sealed class UpdateProcessGraphHandler(IProcessRepository processReposito
 {
     public async Task<Result> HandleAsync(UpdateProcessGraph request, CancellationToken cancellationToken = default)
     {
-        var getProcess = await processRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var process = await processRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (getProcess.IsFailed)
+        if (process == null)
         {
-            return getProcess.ToResult();
+            return Result.Fail($"Process with Id {request.Id} not found.");
         }
 
-        var processToSave = getProcess.Value;
-
         // TODO: apply some mappers
-        processToSave.UpdateGraph(
+        process.UpdateGraph(
             request.Graph.Nodes.Select(n => new GraphNode(n.Id, n.Label, n.XPosition, n.YPosition, n.Description))
                 .ToImmutableList(),
             request.Graph.Edges.Select(e =>
                     new GraphEdge(e.From, e.To, new Measure(e.Value, UnitOfMeasure.FromName(e.UnitOfMeasure))))
                 .ToImmutableList());
         
-        processRepository.Update(processToSave);
+        processRepository.Update(process);
         
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

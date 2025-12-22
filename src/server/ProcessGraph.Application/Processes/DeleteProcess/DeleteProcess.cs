@@ -12,14 +12,12 @@ public sealed class DeleteProcessHandler(IProcessRepository processRepository, I
 {
     public async Task<Result> HandleAsync(DeleteProcess request, CancellationToken cancellationToken = default)
     {
-        var getProcess = await processRepository.GetByIdAsync(request.Id, cancellationToken);
+        var process = await processRepository.GetByIdAsync(request.Id, cancellationToken);
 
-        if (getProcess.IsFailed)
+        if (process == null)
         {
-            return getProcess.ToResult();
+            return Result.Fail($"Process with Id {request.Id} not found.");
         }
-
-        var process = getProcess.Value;
 
         processRepository.Delete(process);
 

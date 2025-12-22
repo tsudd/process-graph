@@ -15,14 +15,12 @@ public sealed class UpdateProcessHandler(IProcessRepository processRepository, I
 {
     public async Task<Result> HandleAsync(UpdateProcess request, CancellationToken cancellationToken = default)
     {
-        var getProcess = await processRepository.GetByIdAsync(request.Id, cancellationToken);
+        var process = await processRepository.GetByIdAsync(request.Id, cancellationToken);
 
-        if (getProcess.IsFailed)
+        if (process == null)
         {
-            return getProcess.ToResult();
+            return Result.Fail($"Process with Id {request.Id} not found.");
         }
-
-        var process = getProcess.Value;
 
         process.UpdateProcess(request.Name ?? process.Name,
             request.Description ?? process.Description,
