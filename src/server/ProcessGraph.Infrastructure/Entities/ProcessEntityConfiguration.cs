@@ -19,5 +19,7 @@ internal sealed class ProcessEntityConfiguration : IEntityTypeConfiguration<Proc
             settingsBuilder.Property(s => s.Unit)
                 .HasConversion(unit => unit.ToString(), s => UnitOfMeasure.FromName(s));
         });
+
+        builder.Property<uint>("Version").IsRowVersion();
     }
 }

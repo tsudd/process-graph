@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  process-graph-db:
+    image: mongodb/mongodb-community-server
+    container_name: process-graph-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+

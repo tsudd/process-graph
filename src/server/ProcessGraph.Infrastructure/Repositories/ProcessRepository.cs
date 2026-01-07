@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
 using ProcessGraph.Domain.Processes;
+using ProcessGraph.Infrastructure.Context;
 
 namespace ProcessGraph.Infrastructure.Repositories;
 

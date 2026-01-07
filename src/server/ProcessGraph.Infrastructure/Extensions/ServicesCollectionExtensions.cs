@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Processes;
+using ProcessGraph.Infrastructure.Context;
 using ProcessGraph.Infrastructure.Repositories;
 
 namespace ProcessGraph.Infrastructure.Extensions;
@@ -18,7 +19,7 @@ public static class ServicesCollectionExtensions
 
         services.AddDbContext<ProcessGraphDbContext>(options =>
         {
-            options.UseMongoDB(connectionString, databaseName).UseSnakeCaseNamingConvention();
+            options.UseMongoDB(connectionString, databaseName);
         });
 
         services.AddScoped<IProcessRepository, ProcessRepository>();
