@@ -11,8 +11,16 @@ public static class ServicesCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Infrastructure services registration goes here
-        services.AddDbContext<ProcessGraphDbContext>(options => { options.UseSqlite("Data Source=process.graph.db"); });
+        var connectionString = configuration.GetConnectionString("MongoDB") ??
+                               throw new InvalidOperationException("MongoDB connection string is not configured.");
+        var databaseName = configuration["MongoDB:DatabaseName"] ??
+                           throw new InvalidOperationException("Database name is not configured.");
+
+        services.AddDbContext<ProcessGraphDbContext>(options =>
+        {
+            options.UseMongoDB(connectionString, databaseName).UseSnakeCaseNamingConvention();
+        });
+
         services.AddScoped<IProcessRepository, ProcessRepository>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ProcessGraphDbContext>());
 
