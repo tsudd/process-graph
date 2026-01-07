@@ -14,13 +14,7 @@ public static class ServicesCollectionExtensions
     {
         var connectionString = configuration.GetConnectionString("MongoDB") ??
                                throw new InvalidOperationException("MongoDB connection string is not configured.");
-        var databaseName = configuration["MongoDB:DatabaseName"] ??
-                           throw new InvalidOperationException("Database name is not configured.");
-
-        services.AddDbContext<ProcessGraphDbContext>(options =>
-        {
-            options.UseMongoDB(connectionString, databaseName);
-        });
+        services.AddDbContext<ProcessGraphDbContext>(options => { options.UseMongoDB(connectionString); });
 
         services.AddScoped<IProcessRepository, ProcessRepository>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ProcessGraphDbContext>());

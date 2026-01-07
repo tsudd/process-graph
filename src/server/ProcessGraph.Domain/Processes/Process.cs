@@ -5,6 +5,11 @@ namespace ProcessGraph.Domain.Processes;
 
 public sealed class Process : Entity
 {
+    private Process()
+    {
+        
+    }
+
     private Process(Guid id, string name, string description, ProcessSettings settings, ProcessStatus status,
         Graph graph)
     {
