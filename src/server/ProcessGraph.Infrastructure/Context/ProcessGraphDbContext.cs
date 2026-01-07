@@ -5,11 +5,6 @@ namespace ProcessGraph.Infrastructure.Context;
 
 public sealed class ProcessGraphDbContext(DbContextOptions<ProcessGraphDbContext> options) : DbContext(options), IUnitOfWork
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSnakeCaseNamingConvention();
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProcessGraphDbContext).Assembly);
