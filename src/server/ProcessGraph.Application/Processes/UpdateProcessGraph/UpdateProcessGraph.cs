@@ -5,7 +5,6 @@ using ProcessGraph.Application.Processes.Dtos;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Graphs;
 using ProcessGraph.Domain.Processes;
-using ProcessGraph.Domain.Shared;
 
 namespace ProcessGraph.Application.Processes.UpdateProcessGraph;
 
@@ -28,11 +27,11 @@ public sealed class UpdateProcessGraphHandler(IProcessRepository processReposito
             request.Graph.Nodes.Select(n => new GraphNode(n.Id, n.Label, n.XPosition, n.YPosition, n.Description))
                 .ToImmutableList(),
             request.Graph.Edges.Select(e =>
-                    new GraphEdge(e.From, e.To, new Measure(e.Value, UnitOfMeasure.FromName(e.UnitOfMeasure))))
+                    new GraphEdge(e.From, e.To, e.Value))
                 .ToImmutableList());
-        
+
         processRepository.Update(process);
-        
+
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result.Ok();

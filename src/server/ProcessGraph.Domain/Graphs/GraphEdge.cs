@@ -1,10 +1,8 @@
-using ProcessGraph.Domain.Shared;
-
 namespace ProcessGraph.Domain.Graphs;
 
 public sealed record GraphEdge(
     Guid From,
     Guid To,
-    Measure Value,
+    int Value,
     string? Description = null,
     string? Label = null);
