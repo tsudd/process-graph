@@ -1,33 +1,52 @@
+using Dapper;
 using FluentResults;
-using ProcessGraph.Application.Abstractions.Pipeline;
-using ProcessGraph.Application.Processes.Dtos;
-using ProcessGraph.Domain.Processes;
+using ProcessGraph.Application.Abstractions.Data;
+using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
+using ProcessGraph.Application.Models;
 
 namespace ProcessGraph.Application.Processes.GetProcess;
 
-public sealed record GetProcess(Guid Id) : IRequest<Result<GetProcessDto>>;
+public sealed record GetProcessQuery(Guid Id) : IQuery<ProcessResponse>;
 
-public sealed class GetProcessHandler(IProcessRepository processRepository)
-    : IRequestHandler<GetProcess, Result<GetProcessDto>>
+public sealed class GetProcessHandler(ISqlConnectionFactory sqlConnectionFactory)
+    : IQueryHandler<GetProcessQuery, ProcessResponse>
 {
-    public async Task<Result<GetProcessDto>> HandleAsync(GetProcess request,
+    public async Task<Result<ProcessResponse>> HandleAsync(GetProcessQuery request,
         CancellationToken cancellationToken = default)
     {
-        var process = await processRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (process == null)
-        {
-            return Result.Fail($"Process with ID {request.Id} not found.");
-        }
+        using var connection = sqlConnectionFactory.CreateConnection();
 
-        // TODO: Map using AutoMapper
-        var dto = new GetProcessDto(
-            process.Id,
-            process.Name,
-            process.Description,
-            new ProcessSettingsDto(process.Settings.Unit.ToString()),
-            process.Status,
-            process.CreatedAt,
-            process.Graph);
-        return dto.ToResult();
+        const string sql = """
+                                       SELECT 
+                                           p.id as Id,
+                                           p.name as Name,
+                                           p.description as Description,
+                                           p.status as Status,
+                                           p.graph as Graph,
+                                           p.created_at as CreatedAt,
+                                           p.last_modified_at as LastModifiedAt,
+                                           p.settings_unit AS Unit
+                                       FROM processes p
+                                       WHERE p.Id = @ProcessId
+                           """;
+        var getQuery = await connection.QueryAsync<ProcessResponse, ProcessSettingsModel, ProcessResponse>(
+            sql,
+            (proc, settings) =>
+            {
+                proc.ProcessSettings = settings;
+                return proc;
+            },
+            new
+            {
+                ProcessId = request.Id
+            },
+            splitOn: "Unit").ConfigureAwait(false);
+
+        var processDto = getQuery.FirstOrDefault();
+
+        if (processDto == null)
+            return Result.Fail("Process not found.");
+
+        return processDto;
     }
 }

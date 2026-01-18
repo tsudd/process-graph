@@ -1,11 +1,14 @@
 using System.Text.Json;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using ProcessGraph.Application.Abstractions.Data;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Processes;
 using ProcessGraph.Infrastructure.Context;
+using ProcessGraph.Infrastructure.Data;
 using ProcessGraph.Infrastructure.Repositories;
 
 namespace ProcessGraph.Infrastructure.Extensions;
@@ -32,6 +35,8 @@ public static class ServicesCollectionExtensions
         });
         services.AddScoped<IProcessRepository, ProcessRepository>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ProcessGraphDbContext>());
+        services.AddSingleton<ISqlConnectionFactory>(_ => new SqlConnectionFactory(connectionString));
+        SqlMapper.AddTypeHandler(new GraphModelTypeHandler());
 
         return services;
     }

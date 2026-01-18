@@ -1,5 +1,6 @@
 using FluentResults;
-using ProcessGraph.Application.Abstractions.Pipeline;
+using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
+using ProcessGraph.Application.Models;
 using ProcessGraph.Application.Processes.Dtos;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Processes;
@@ -7,11 +8,11 @@ using ProcessGraph.Domain.Shared;
 
 namespace ProcessGraph.Application.Processes.UpdateProcess;
 
-public sealed record UpdateProcess(Guid Id, string? Name, string? Description, ProcessSettingsDto? ProcessSettings)
-    : IRequest<Result>;
+public sealed record UpdateProcess(Guid Id, string? Name, string? Description, ProcessSettingsModel? ProcessSettings)
+    : ICommand;
 
 public sealed class UpdateProcessHandler(IProcessRepository processRepository, IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateProcess, Result>
+    : ICommandHandler<UpdateProcess>
 {
     public async Task<Result> HandleAsync(UpdateProcess request, CancellationToken cancellationToken = default)
     {

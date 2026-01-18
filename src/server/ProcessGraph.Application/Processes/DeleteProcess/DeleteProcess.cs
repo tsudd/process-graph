@@ -1,14 +1,15 @@
 using FluentResults;
 using ProcessGraph.Application.Abstractions.Pipeline;
+using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Processes;
 
 namespace ProcessGraph.Application.Processes.DeleteProcess;
 
-public sealed record DeleteProcess(Guid Id) : IRequest<Result>;
+public sealed record DeleteProcess(Guid Id) : ICommand<Result>;
 
 public sealed class DeleteProcessHandler(IProcessRepository processRepository, IUnitOfWork unitOfWork)
-    : IRequestHandler<DeleteProcess, Result>
+    : ICommandHandler<DeleteProcess>
 {
     public async Task<Result> HandleAsync(DeleteProcess request, CancellationToken cancellationToken = default)
     {

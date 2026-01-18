@@ -3,6 +3,7 @@ using ProcessGraph.Application.Processes.CreateProcess;
 using ProcessGraph.Application.Processes.GetProcess;
 using ProcessGraph.Application.Processes.Dtos;
 using ProcessGraph.Application.Abstractions.Pipeline;
+using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
 
 namespace ProcessGraph.API.Endpoints;
 
@@ -18,27 +19,27 @@ public static class ProcessEndpoints
             .Produces<Guid>(StatusCodes.Status201Created)
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status400BadRequest);
-        
+
         group.MapGet("/{id:guid}", GetProcess)
             .WithName("GetProcess")
-            .Produces<GetProcessDto>()
+            .Produces<ProcessResponse>()
             .ProducesProblem(StatusCodes.Status404NotFound);
-        
+
         group.MapGet("/", GetProcesses)
             .WithName("GetProcesses")
-            .Produces<IEnumerable<GetProcessDto>>();
-        
+            .Produces<IEnumerable<ProcessResponse>>();
+
         group.MapPut("/{id:guid}", UpdateProcess)
             .WithName("UpdateProcess")
-            .Produces<GetProcessDto>()
+            .Produces<ProcessResponse>()
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound);
-        
+
         group.MapDelete("/{id:guid}", DeleteProcess)
             .WithName("DeleteProcess")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
-        
+
         return group;
     }
 
@@ -53,16 +54,16 @@ public static class ProcessEndpoints
     /// <response code="400">Invalid request data</response>
     private static async Task<IResult> CreateProcess(
         [FromBody] CreateProcessRequest request,
-        [FromServices] IRequestHandler<CreateProcess, FluentResults.Result<Guid>> handler,
+        [FromServices] ICommandHandler<CreateProcess, Guid> handler,
         CancellationToken cancellationToken)
     {
         var command = new CreateProcess(request.Name, request.Description);
         var result = await handler.HandleAsync(command, cancellationToken);
-        return result.IsSuccess 
+        return result.IsSuccess
             ? Results.Created($"/api/v1/processes/{result.Value}", result.Value)
             : Results.BadRequest(result.Errors.FirstOrDefault()?.Message ?? "Creation failed");
     }
-    
+
     /// <summary>
     /// Retrieves a process by its unique identifier
     /// </summary>
@@ -74,17 +75,17 @@ public static class ProcessEndpoints
     /// <response code="404">Process not found</response>
     private static async Task<IResult> GetProcess(
         [FromRoute] Guid id,
-        [FromServices] IRequestHandler<GetProcess, FluentResults.Result<GetProcessDto>> handler,
+        [FromServices] IQueryHandler<GetProcessQuery, ProcessResponse> handler,
         CancellationToken cancellationToken)
     {
-        var query = new GetProcess(id);
+        var query = new GetProcessQuery(id);
         var result = await handler.HandleAsync(query, cancellationToken);
-        return result.IsSuccess 
+        return result.IsSuccess
             ? Results.Ok(result.Value)
             // TODO: shift to problem details and automate with filters/validators
             : Results.NotFound(result.Errors.FirstOrDefault()?.Message ?? "Process not found");
     }
-    
+
     /// <summary>
     /// Retrieves a list of all processes
     /// </summary>
@@ -94,9 +95,9 @@ public static class ProcessEndpoints
     private static async Task<IResult> GetProcesses(
         CancellationToken cancellationToken)
     {
-        return Results.Ok(new List<GetProcessDto>());
+        return Results.Ok(new List<ProcessResponse>());
     }
-    
+
     /// <summary>
     /// Updates an existing process with new data
     /// </summary>
@@ -114,7 +115,7 @@ public static class ProcessEndpoints
     {
         throw new NotImplementedException();
     }
-    
+
     /// <summary>
     /// Deletes a process by its unique identifier
     /// </summary>

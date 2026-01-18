@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using FluentResults;
-using ProcessGraph.Application.Abstractions.Pipeline;
+using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
 using ProcessGraph.Application.Processes.Dtos;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Graphs;
@@ -8,10 +8,10 @@ using ProcessGraph.Domain.Processes;
 
 namespace ProcessGraph.Application.Processes.UpdateProcessGraph;
 
-public sealed record UpdateProcessGraph(Guid Id, GraphDto Graph) : IRequest<Result>;
+public sealed record UpdateProcessGraph(Guid Id, GraphDto Graph) : ICommand;
 
 public sealed class UpdateProcessGraphHandler(IProcessRepository processRepository, IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateProcessGraph, Result>
+    : ICommandHandler<UpdateProcessGraph>
 {
     public async Task<Result> HandleAsync(UpdateProcessGraph request, CancellationToken cancellationToken = default)
     {

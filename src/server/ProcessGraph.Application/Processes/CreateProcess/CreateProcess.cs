@@ -1,14 +1,14 @@
 ﻿using FluentResults;
-using ProcessGraph.Application.Abstractions.Pipeline;
+using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Processes;
 
 namespace ProcessGraph.Application.Processes.CreateProcess;
 
-public sealed record CreateProcess(string Name, string? Description) : IRequest<Result<Guid>>;
+public sealed record CreateProcess(string Name, string? Description) : ICommand<Result<Guid>>;
 
 public sealed class CreateProcessHandler(IProcessRepository processRepository, IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateProcess, Result<Guid>>
+    : ICommandHandler<CreateProcess, Guid>
 {
     public async Task<Result<Guid>> HandleAsync(CreateProcess request, CancellationToken cancellationToken = default)
     {
