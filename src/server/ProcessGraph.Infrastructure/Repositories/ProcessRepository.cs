@@ -10,7 +10,6 @@ internal sealed class ProcessRepository(ProcessGraphDbContext context) : IProces
     public async Task<Process?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await context.Set<Process>()
-            .Include(process => process.Graph)
             .FirstOrDefaultAsync(process => process.Id == id, cancellationToken)
             .ConfigureAwait(false);
     }

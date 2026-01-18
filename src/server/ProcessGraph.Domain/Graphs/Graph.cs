@@ -1,24 +1,22 @@
-using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Processes;
 
 namespace ProcessGraph.Domain.Graphs;
 
-public sealed class Graph : Entity
+public sealed class Graph
 {
     private Graph()
     {
     }
 
-    public Graph(Guid Id, IList<GraphNode> Nodes, IList<GraphEdge> Edges)
+    public Graph(IList<GraphNode> nodes, IList<GraphEdge> edges)
     {
-        this.Id = Id;
-        this.Nodes = Nodes;
-        this.Edges = Edges;
+        Nodes = nodes;
+        Edges = edges;
     }
 
     public static Graph CreateEmpty()
     {
-        return new Graph(Guid.NewGuid(), new List<GraphNode>(), new List<GraphEdge>());
+        return new Graph(new List<GraphNode>(), new List<GraphEdge>());
     }
 
     public void UpdateNodes(IReadOnlyList<GraphNode> nodes)
@@ -45,7 +43,6 @@ public sealed class Graph : Entity
         throw new NotImplementedException();
     }
 
-    public Guid Id { get; init; }
     public IList<GraphNode> Nodes { get; init; }
     public IList<GraphEdge> Edges { get; init; }
 }

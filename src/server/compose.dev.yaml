@@ -1,16 +1,13 @@
 services:
   process-graph-db:
-    image: mongodb/mongodb-community-server
+    image: postgres:18
     container_name: process-graph-db
+    environment:
+        POSTGRES_USER: process_graph_user
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: process_graph_dev
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongo-data:/data/db
-    command: mongod --replSet rs0 --bind_ip_all
-#    requires one time initialization of the replica set after the container is up and running:
-#  docker exec -it process-graph-db mongosh --eval "rs.initiate({_id:"rs0",members:[{_id:0,host:"mongodb:27017"}]})"
-# then it should be made as primary
-
-volumes:
-  mongo-data:
+      - ./.containers/process-graph-db-data:/var/lib/postgresql
 

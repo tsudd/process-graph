@@ -7,6 +7,9 @@ public sealed class ProcessGraphDbContext(DbContextOptions<ProcessGraphDbContext
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Enable PostgreSQL pg_trgm extension for fuzzy search
+        modelBuilder.HasPostgresExtension("pg_trgm");
+        
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProcessGraphDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }

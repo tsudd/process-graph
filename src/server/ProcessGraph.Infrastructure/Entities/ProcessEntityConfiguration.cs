@@ -9,17 +9,44 @@ internal sealed class ProcessEntityConfiguration : IEntityTypeConfiguration<Proc
 {
     public void Configure(EntityTypeBuilder<Process> builder)
     {
-        builder.HasKey(process => process.Id);
+        builder.ToTable("processes");
 
-        builder.Property(process => process.Status)
-            .HasConversion<int>();
+        builder.HasKey(p => p.Id);
 
-        builder.OwnsOne(process => process.Settings, settingsBuilder =>
+        builder.Property(p => p.Id)
+            .HasDefaultValueSql("gen_random_uuid()");
+
+        builder.Property(p => p.Name)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(p => p.CreatedAt)
+            .HasColumnType("timestamptz")
+            .IsRequired();
+
+        builder.Property(p => p.LastModifiedAt)
+            .HasColumnType("timestamptz");
+
+        builder.HasIndex(p => p.Name)
+            .HasDatabaseName("IX_processes_name")
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops");
+
+        builder.Property(p => p.Description).HasMaxLength(300);
+
+        builder.Property(p => p.Status);
+
+        builder.OwnsOne(p => p.Settings, settingsBuilder =>
         {
             settingsBuilder.Property(s => s.Unit)
-                .HasConversion(unit => unit.ToString(), s => UnitOfMeasure.FromName(s));
+                .HasConversion(
+                    v => v.ToString(),
+                    v => UnitOfMeasure.FromName(v))
+                .IsRequired();
         });
 
+        builder.Property(p => p.Graph).HasColumnType("jsonb");
+        
         builder.Property<uint>("Version").IsRowVersion();
     }
 }

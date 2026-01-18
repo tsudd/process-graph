@@ -1,5 +1,6 @@
 using ProcessGraph.Infrastructure.Extensions;
 using ProcessGraph.API.Endpoints;
+using ProcessGraph.API.Extensions;
 using ProcessGraph.Application.Extensions;
 using Scalar.AspNetCore;
 
@@ -18,6 +19,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+    app.ApplyMigrations();
 }
 
 app.UseHttpsRedirection();

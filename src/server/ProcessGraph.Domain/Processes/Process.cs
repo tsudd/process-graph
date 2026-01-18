@@ -7,17 +7,18 @@ public sealed class Process : Entity
 {
     private Process()
     {
-        
     }
 
     private Process(Guid id, string name, string description, ProcessSettings settings, ProcessStatus status,
-        Graph graph)
+        Graph graph, DateTime createdAt)
     {
         Name = name;
         Description = description;
         Settings = settings;
         Status = status;
         Graph = graph;
+        Id = id;
+        CreatedAt = createdAt;
     }
 
     public string Name { get; private set; }
@@ -33,7 +34,9 @@ public sealed class Process : Entity
         ProcessSettings settings
     )
     {
-        return new Process(Guid.NewGuid(), name, description, settings, ProcessStatus.NotStarted, Graph.CreateEmpty());
+        // TODO: use datetime provider?
+        return new Process(Guid.NewGuid(), name, description, settings, ProcessStatus.NotStarted, Graph.CreateEmpty(),
+            DateTime.UtcNow);
     }
 
     public void UpdateProcess(string name, string description, ProcessSettings settings)
