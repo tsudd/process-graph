@@ -22,13 +22,6 @@ internal sealed class ProcessRepository(ProcessGraphDbContext context) : IProces
     public void Update(Process process)
     {
         context.Update(process);
-        
-        var graphEntry = context.Entry(process.Graph);
-        if (graphEntry.State == EntityState.Modified || graphEntry.State == EntityState.Unchanged)
-        {
-            graphEntry.Property(g => g.Nodes).IsModified = true;
-            graphEntry.Property(g => g.Edges).IsModified = true;
-        }
     }
 
     public void Delete(Process process)

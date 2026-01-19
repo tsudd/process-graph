@@ -48,10 +48,9 @@ public sealed class Process : Entity
         LastModifiedAt = DateTime.UtcNow;
     }
 
-    public void UpdateGraph(IReadOnlyList<GraphNode> nodes, IReadOnlyList<GraphEdge> edges)
+    public void UpdateGraph(Graph graph)
     {
-        Graph.UpdateNodes(nodes);
-        Graph.UpdateEdges(edges);
+        Graph = graph;
         LastModifiedAt = DateTime.UtcNow;
     }
 }

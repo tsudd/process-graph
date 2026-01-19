@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using ProcessGraph.API.Requests;
 using ProcessGraph.Application.Processes.CreateProcess;
 using ProcessGraph.Application.Processes.GetProcess;
-using ProcessGraph.Application.Processes.Dtos;
-using ProcessGraph.Application.Abstractions.Pipeline;
 using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
+using ProcessGraph.Application.Processes.DeleteProcess;
+using ProcessGraph.Application.Processes.UpdateProcess;
 
 namespace ProcessGraph.API.Endpoints;
 
@@ -29,7 +30,7 @@ public static class ProcessEndpoints
             .WithName("GetProcesses")
             .Produces<IEnumerable<ProcessResponse>>();
 
-        group.MapPut("/{id:guid}", UpdateProcess)
+        group.MapPatch("/{id:guid}", UpdateProcess)
             .WithName("UpdateProcess")
             .Produces<ProcessResponse>()
             .ProducesValidationProblem()
@@ -54,10 +55,10 @@ public static class ProcessEndpoints
     /// <response code="400">Invalid request data</response>
     private static async Task<IResult> CreateProcess(
         [FromBody] CreateProcessRequest request,
-        [FromServices] ICommandHandler<CreateProcess, Guid> handler,
+        [FromServices] ICommandHandler<CreateProcessCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var command = new CreateProcess(request.Name, request.Description);
+        var command = new CreateProcessCommand(request.Name, request.Description);
         var result = await handler.HandleAsync(command, cancellationToken);
         return result.IsSuccess
             ? Results.Created($"/api/v1/processes/{result.Value}", result.Value)
@@ -103,6 +104,7 @@ public static class ProcessEndpoints
     /// </summary>
     /// <param name="id">The process ID to update</param>
     /// <param name="request">The process update request</param>
+    /// <param name="handler">The update process handler</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The updated process details</returns>
     /// <response code="200">Process updated successfully</response>
@@ -111,23 +113,39 @@ public static class ProcessEndpoints
     private static async Task<IResult> UpdateProcess(
         [FromRoute] Guid id,
         [FromBody] UpdateProcessRequest request,
+        [FromServices] UpdateProcessCommandHandler handler,
         CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var command = new UpdateProcessCommand(
+            id,
+            request.Name,
+            request.Description,
+            request.ProcessSettings
+            );
+        var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess
+            ? Results.Ok()
+            : Results.NotFound(result.Errors.FirstOrDefault()?.Message ?? "Process not found");
     }
 
     /// <summary>
     /// Deletes a process by its unique identifier
     /// </summary>
     /// <param name="id">The process ID to delete</param>
+    /// <param name="handler">The create process handler</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>No content on success</returns>
     /// <response code="204">Process deleted successfully</response>
     /// <response code="404">Process not found</response>
     private static async Task<IResult> DeleteProcess(
         [FromRoute] Guid id,
+        [FromServices] DeleteProcessCommandHandler handler, 
         CancellationToken cancellationToken)
     {
-        return Results.NoContent();
+        var command = new DeleteProcessCommand(id);
+        var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess
+            ? Results.NoContent()
+            : Results.NotFound(result.Errors.FirstOrDefault()?.Message ?? "Process not found");
     }
 }

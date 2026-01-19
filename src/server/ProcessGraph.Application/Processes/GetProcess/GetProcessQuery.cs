@@ -8,10 +8,10 @@ namespace ProcessGraph.Application.Processes.GetProcess;
 
 public sealed record GetProcessQuery(Guid Id) : IQuery<ProcessResponse>;
 
-public sealed class GetProcessHandler(ISqlConnectionFactory sqlConnectionFactory)
+public sealed class GetProcessQueryHandler(ISqlConnectionFactory sqlConnectionFactory)
     : IQueryHandler<GetProcessQuery, ProcessResponse>
 {
-    public async Task<Result<ProcessResponse>> HandleAsync(GetProcessQuery request,
+    public async Task<Result<ProcessResponse>> HandleAsync(GetProcessQuery command,
         CancellationToken cancellationToken = default)
     {
         using var connection = sqlConnectionFactory.CreateConnection();
@@ -38,7 +38,7 @@ public sealed class GetProcessHandler(ISqlConnectionFactory sqlConnectionFactory
             },
             new
             {
-                ProcessId = request.Id
+                ProcessId = command.Id
             },
             splitOn: "Unit").ConfigureAwait(false);
 

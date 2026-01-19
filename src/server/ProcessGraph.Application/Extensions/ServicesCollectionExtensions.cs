@@ -13,8 +13,8 @@ public static class ServicesCollectionExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped(typeof(IRequestPipeline<,>), typeof(RequestPipeline<,>));
-        services.AddScoped<ICommandHandler<CreateProcess, Guid>, CreateProcessHandler>();
-        services.AddScoped<IQueryHandler<GetProcessQuery, ProcessResponse>, GetProcessHandler>();
+        services.AddScoped<ICommandHandler<CreateProcessCommand, Guid>, CreateProcessCommandHandler>();
+        services.AddScoped<IQueryHandler<GetProcessQuery, ProcessResponse>, GetProcessQueryHandler>();
 
         return services;
     }
