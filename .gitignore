@@ -419,3 +419,4 @@ FodyWeavers.xsd
 
 # custom
 src/server/.idea/
+.tmp/*

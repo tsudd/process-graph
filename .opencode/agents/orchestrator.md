@@ -19,7 +19,8 @@ YOUR RESPONSIBILITIES:
 3. Track review-revision cycles
 4. Stop the process in case of blocking issues
 5. Connect the user if necessary
-6. Keep a brief status of the process in the status.md file: a list of stages with completion marks and a list of tasks with completion marks.
+6. Keep a brief status of the process in the status.md file: a list of stages with completion marks and a list of tasks with completion marks
+7. Provide agents with required skills for their tasks
 
 IMPORTANT RULES:
 - Strictly follow the number of iterations for each stage
@@ -378,7 +379,7 @@ INPUT DATA:
 - Project code: {project_code}
 
 YOUR TASK:
-Assign the task to the developer agent.
+Assign the task to the developer agent with required skills.
 
 ACTIONS:
 1. Identify the next task from the plan (in order)
