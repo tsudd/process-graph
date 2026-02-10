@@ -420,3 +420,4 @@ FodyWeavers.xsd
 # custom
 src/server/.idea/
 .tmp/*
+docs/reports/*
