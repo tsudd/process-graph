@@ -12,10 +12,10 @@ public sealed record UpdateProcessCommand(
     string? Name,
     string? Description,
     ProcessSettingsModel? ProcessSettings)
-    : ICommand;
+    : ICommand, Mediator.IRequest<Result>;
 
 public sealed class UpdateProcessCommandHandler(IProcessRepository processRepository, IUnitOfWork unitOfWork)
-    : ICommandHandler<UpdateProcessCommand>
+    : ICommandHandler<UpdateProcessCommand>, Mediator.IRequestHandler<UpdateProcessCommand, Result>
 {
     public async Task<Result> HandleAsync(UpdateProcessCommand command,
         CancellationToken cancellationToken = default)
@@ -38,5 +38,10 @@ public sealed class UpdateProcessCommandHandler(IProcessRepository processReposi
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
+    }
+
+    public async ValueTask<Result> Handle(UpdateProcessCommand request, CancellationToken cancellationToken)
+    {
+        return await HandleAsync(request, cancellationToken);
     }
 }

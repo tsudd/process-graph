@@ -2,6 +2,9 @@
 description: Orchestrator agent for multi-agent software development system. Waterfall with confirmation.
 mode: primary
 temperature: 0.3
+permission:
+    skill:
+        "beads-tracking": "allow"
 ---
 
 # Prompts for the Orchestrator

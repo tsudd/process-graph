@@ -6,10 +6,10 @@ using ProcessGraph.Application.Models;
 
 namespace ProcessGraph.Application.Processes.GetProcess;
 
-public sealed record GetProcessQuery(Guid Id) : IQuery<ProcessResponse>;
+public sealed record GetProcessQuery(Guid Id) : IQuery<ProcessResponse>, Mediator.IRequest<Result<ProcessResponse>>;
 
 public sealed class GetProcessQueryHandler(ISqlConnectionFactory sqlConnectionFactory)
-    : IQueryHandler<GetProcessQuery, ProcessResponse>
+    : IQueryHandler<GetProcessQuery, ProcessResponse>, Mediator.IRequestHandler<GetProcessQuery, Result<ProcessResponse>>
 {
     public async Task<Result<ProcessResponse>> HandleAsync(GetProcessQuery command,
         CancellationToken cancellationToken = default)
@@ -48,5 +48,10 @@ public sealed class GetProcessQueryHandler(ISqlConnectionFactory sqlConnectionFa
             return Result.Fail("Process not found.");
 
         return processDto;
+    }
+
+    public async ValueTask<Result<ProcessResponse>> Handle(GetProcessQuery request, CancellationToken cancellationToken)
+    {
+        return await HandleAsync(request, cancellationToken);
     }
 }

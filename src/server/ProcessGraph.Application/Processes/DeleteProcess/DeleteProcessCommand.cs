@@ -5,10 +5,10 @@ using ProcessGraph.Domain.Processes;
 
 namespace ProcessGraph.Application.Processes.DeleteProcess;
 
-public sealed record DeleteProcessCommand(Guid Id) : ICommand<Result>;
+public sealed record DeleteProcessCommand(Guid Id) : ICommand<Result>, Mediator.IRequest<Result>;
 
 public sealed class DeleteProcessCommandHandler(IProcessRepository processRepository, IUnitOfWork unitOfWork)
-    : ICommandHandler<DeleteProcessCommand>
+    : ICommandHandler<DeleteProcessCommand>, Mediator.IRequestHandler<DeleteProcessCommand, Result>
 {
     public async Task<Result> HandleAsync(DeleteProcessCommand command, CancellationToken cancellationToken = default)
     {
@@ -24,5 +24,10 @@ public sealed class DeleteProcessCommandHandler(IProcessRepository processReposi
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result.Ok();
+    }
+
+    public async ValueTask<Result> Handle(DeleteProcessCommand request, CancellationToken cancellationToken)
+    {
+        return await HandleAsync(request, cancellationToken);
     }
 }

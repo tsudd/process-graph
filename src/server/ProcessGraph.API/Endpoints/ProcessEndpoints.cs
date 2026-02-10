@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using ProcessGraph.API.Requests;
 using ProcessGraph.Application.Processes.CreateProcess;
 using ProcessGraph.Application.Processes.GetProcess;
-using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
 using ProcessGraph.Application.Processes.DeleteProcess;
 using ProcessGraph.Application.Processes.UpdateProcess;
+using Mediator;
 
 namespace ProcessGraph.API.Endpoints;
 
@@ -48,18 +48,18 @@ public static class ProcessEndpoints
     /// Creates a new process with the provided details
     /// </summary>
     /// <param name="request">The process creation request</param>
-    /// <param name="handler">The create process handler</param>
+    /// <param name="mediator">The mediator instance</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The ID of the created process</returns>
     /// <response code="201">Process created successfully</response>
     /// <response code="400">Invalid request data</response>
     private static async Task<IResult> CreateProcess(
         [FromBody] CreateProcessRequest request,
-        [FromServices] ICommandHandler<CreateProcessCommand, Guid> handler,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         var command = new CreateProcessCommand(request.Name, request.Description);
-        var result = await handler.HandleAsync(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken);
         return result.IsSuccess
             ? Results.Created($"/api/v1/processes/{result.Value}", result.Value)
             : Results.BadRequest(result.Errors.FirstOrDefault()?.Message ?? "Creation failed");
@@ -69,18 +69,18 @@ public static class ProcessEndpoints
     /// Retrieves a process by its unique identifier
     /// </summary>
     /// <param name="id">The process ID</param>
-    /// <param name="handler">The get process handler</param>
+    /// <param name="mediator">The mediator instance</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The process details</returns>
     /// <response code="200">Process found and returned</response>
     /// <response code="404">Process not found</response>
     private static async Task<IResult> GetProcess(
         [FromRoute] Guid id,
-        [FromServices] IQueryHandler<GetProcessQuery, ProcessResponse> handler,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         var query = new GetProcessQuery(id);
-        var result = await handler.HandleAsync(query, cancellationToken);
+        var result = await mediator.Send(query, cancellationToken);
         return result.IsSuccess
             ? Results.Ok(result.Value)
             // TODO: shift to problem details and automate with filters/validators
@@ -104,7 +104,7 @@ public static class ProcessEndpoints
     /// </summary>
     /// <param name="id">The process ID to update</param>
     /// <param name="request">The process update request</param>
-    /// <param name="handler">The update process handler</param>
+    /// <param name="mediator">The mediator instance</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The updated process details</returns>
     /// <response code="200">Process updated successfully</response>
@@ -113,7 +113,7 @@ public static class ProcessEndpoints
     private static async Task<IResult> UpdateProcess(
         [FromRoute] Guid id,
         [FromBody] UpdateProcessRequest request,
-        [FromServices] UpdateProcessCommandHandler handler,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         var command = new UpdateProcessCommand(
@@ -122,7 +122,7 @@ public static class ProcessEndpoints
             request.Description,
             request.ProcessSettings
             );
-        var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(command, cancellationToken);
         return result.IsSuccess
             ? Results.Ok()
             : Results.NotFound(result.Errors.FirstOrDefault()?.Message ?? "Process not found");
@@ -132,18 +132,18 @@ public static class ProcessEndpoints
     /// Deletes a process by its unique identifier
     /// </summary>
     /// <param name="id">The process ID to delete</param>
-    /// <param name="handler">The create process handler</param>
+    /// <param name="mediator">The mediator instance</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>No content on success</returns>
     /// <response code="204">Process deleted successfully</response>
     /// <response code="404">Process not found</response>
     private static async Task<IResult> DeleteProcess(
         [FromRoute] Guid id,
-        [FromServices] DeleteProcessCommandHandler handler, 
+        [FromServices] IMediator mediator, 
         CancellationToken cancellationToken)
     {
         var command = new DeleteProcessCommand(id);
-        var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(command, cancellationToken);
         return result.IsSuccess
             ? Results.NoContent()
             : Results.NotFound(result.Errors.FirstOrDefault()?.Message ?? "Process not found");

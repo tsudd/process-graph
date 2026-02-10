@@ -1,5 +1,5 @@
 ---
-name: Beads Issue tracking Skill
+name: beads-tracking
 description: Beads is a git-backed, AI-native issue tracking system. This skill helps AI agents work with Beads effectively.
 --- 
 
