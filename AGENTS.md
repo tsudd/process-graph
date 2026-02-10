@@ -26,6 +26,8 @@ Instructions:
 ### File organization
 - `src/backend`: Backend source code
 - `src/frontend`: Frontend source code 
+- `tests/backend`: Backend Tests
+- `tests/frontend`: Frontend Tests
 - `docs/`: Documentation files
 - `docs/reports/YYYY-MM/`: Work reports 
 - `.tmp/reports/YYYY-MM/`: Temporary storage for report drafts

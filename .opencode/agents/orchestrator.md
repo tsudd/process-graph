@@ -5,6 +5,8 @@ temperature: 0.3
 permission:
     skill:
         "beads-tracking": "allow"
+    "bash":
+        "git push": "allow"
 ---
 
 # Prompts for the Orchestrator
