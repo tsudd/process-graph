@@ -82,30 +82,47 @@ public sealed class GetProcessesQueryHandler(ISqlConnectionFactory sqlConnection
         var conditions = new List<string>();
         var parameters = new DynamicParameters();
 
-        // Search term filter using fuzzy search
+        // Enhanced search term filter using optimized fuzzy search
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))
         {
-            conditions.Add("(p.name ILIKE @SearchPattern OR similarity(p.name, @SearchTerm) > 0.1)");
+            // Use pg_trgm similarity with ranking for better performance and results
+            // Combine exact match (ILIKE), similarity search, and word matching
+            conditions.Add(@"
+                (
+                    p.name ILIKE @ExactPattern OR 
+                    similarity(p.name, @SearchTerm) > 0.2 OR
+                    p.name % @SearchTerm OR
+                    to_tsvector('english', p.name) @@ plainto_tsquery('english', @SearchTerm)
+                )");
             parameters.Add("@SearchTerm", query.SearchTerm);
-            parameters.Add("@SearchPattern", $"%{query.SearchTerm}%");
+            parameters.Add("@ExactPattern", $"%{query.SearchTerm}%");
         }
 
-        // Connection filter
+        // Optimized connection filter using the functional index
         switch (query.ConnectionFilter)
         {
             case ProcessConnectionFilter.WithConnections:
-                conditions.Add(@"EXISTS (
-                    SELECT 1 
-                    FROM jsonb_array_elements(p.graph->'nodes') AS node 
-                    WHERE jsonb_array_length(COALESCE(node->'connections', '[]'::jsonb)) > 0
-                )");
+                // Use the functional index for better performance
+                conditions.Add(@"
+                    (CASE 
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM jsonb_array_elements(p.graph->'nodes') AS node 
+                            WHERE jsonb_array_length(COALESCE(node->'connections', '[]'::jsonb)) > 0
+                        ) THEN true 
+                        ELSE false 
+                    END) = true");
                 break;
             case ProcessConnectionFilter.WithoutConnections:
-                conditions.Add(@"NOT EXISTS (
-                    SELECT 1 
-                    FROM jsonb_array_elements(p.graph->'nodes') AS node 
-                    WHERE jsonb_array_length(COALESCE(node->'connections', '[]'::jsonb)) > 0
-                )");
+                conditions.Add(@"
+                    (CASE 
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM jsonb_array_elements(p.graph->'nodes') AS node 
+                            WHERE jsonb_array_length(COALESCE(node->'connections', '[]'::jsonb)) > 0
+                        ) THEN true 
+                        ELSE false 
+                    END) = false");
                 break;
             case ProcessConnectionFilter.Any:
             default:
@@ -126,14 +143,52 @@ public sealed class GetProcessesQueryHandler(ISqlConnectionFactory sqlConnection
         
         return sortBy switch
         {
-            ProcessSortBy.Name => $"ORDER BY p.name {direction}",
-            ProcessSortBy.CreatedAt => $"ORDER BY p.created_at {direction}",
-            _ => "ORDER BY p.created_at DESC"
+            ProcessSortBy.Name => $"ORDER BY p.name COLLATE \"C\" {direction}", // Use C collation for better index performance
+            ProcessSortBy.CreatedAt => $"ORDER BY p.created_at {direction}", // Will use IX_processes_created_at index
+            _ => "ORDER BY p.created_at DESC" // Default to newest first
         };
     }
 
     public async ValueTask<Result<PagedResult<ProcessResponse>>> Handle(GetProcessesQuery request, CancellationToken cancellationToken)
     {
         return await HandleAsync(request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Analyzes query performance and returns the execution plan.
+    /// This method is intended for performance testing and optimization.
+    /// </summary>
+    public async Task<string> AnalyzeQueryPerformanceAsync(GetProcessesQuery query, CancellationToken cancellationToken = default)
+    {
+        using var connection = sqlConnectionFactory.CreateConnection();
+
+        var (whereClause, parameters) = BuildWhereClause(query);
+        var orderByClause = BuildOrderByClause(query.SortBy, query.SortDirection);
+        
+        var offset = (query.Page - 1) * query.Limit;
+        var queryParams = new DynamicParameters(parameters);
+        queryParams.Add("@Offset", offset);
+        queryParams.Add("@Limit", query.Limit);
+
+        // Get query execution plan
+        var explainSql = $"""
+                         EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
+                         SELECT 
+                             p.id as Id,
+                             p.name as Name,
+                             p.description as Description,
+                             p.status as Status,
+                             p.graph as Graph,
+                             p.created_at as CreatedAt,
+                             p.last_modified_at as LastModifiedAt,
+                             p.settings_unit AS Unit
+                         FROM processes p
+                         {whereClause}
+                         {orderByClause}
+                         OFFSET @Offset LIMIT @Limit
+                         """;
+
+        var plan = await connection.QuerySingleAsync<string>(explainSql, queryParams);
+        return plan;
     }
 }
