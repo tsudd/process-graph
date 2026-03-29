@@ -1,5 +1,5 @@
 using FluentResults;
-using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
+using Mediator;
 using ProcessGraph.Application.Models;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Processes;
@@ -12,10 +12,10 @@ public sealed record UpdateProcessCommand(
     string? Name,
     string? Description,
     ProcessSettingsModel? ProcessSettings)
-    : ICommand, Mediator.IRequest<Result>;
+    : ICommand<Result>;
 
 public sealed class UpdateProcessCommandHandler(IProcessRepository processRepository, IUnitOfWork unitOfWork)
-    : ICommandHandler<UpdateProcessCommand>, Mediator.IRequestHandler<UpdateProcessCommand, Result>
+    : ICommandHandler<UpdateProcessCommand, Result>
 {
     public async Task<Result> HandleAsync(UpdateProcessCommand command,
         CancellationToken cancellationToken = default)

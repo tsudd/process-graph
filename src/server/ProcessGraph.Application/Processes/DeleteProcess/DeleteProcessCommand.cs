@@ -1,16 +1,16 @@
 using FluentResults;
-using ProcessGraph.Application.Abstractions.Pipeline.Messaging;
+using Mediator;
 using ProcessGraph.Domain.Abstractions;
 using ProcessGraph.Domain.Processes;
 
 namespace ProcessGraph.Application.Processes.DeleteProcess;
 
-public sealed record DeleteProcessCommand(Guid Id) : ICommand<Result>, Mediator.IRequest<Result>;
+public sealed record DeleteProcessCommand(Guid Id) : ICommand<Result>;
 
 public sealed class DeleteProcessCommandHandler(IProcessRepository processRepository, IUnitOfWork unitOfWork)
-    : ICommandHandler<DeleteProcessCommand>, Mediator.IRequestHandler<DeleteProcessCommand, Result>
+    : ICommandHandler<DeleteProcessCommand, Result>
 {
-    public async Task<Result> HandleAsync(DeleteProcessCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask<Result> Handle(DeleteProcessCommand command, CancellationToken cancellationToken)
     {
         var process = await processRepository.GetByIdAsync(command.Id, cancellationToken);
 
@@ -24,10 +24,5 @@ public sealed class DeleteProcessCommandHandler(IProcessRepository processReposi
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result.Ok();
-    }
-
-    public async ValueTask<Result> Handle(DeleteProcessCommand request, CancellationToken cancellationToken)
-    {
-        return await HandleAsync(request, cancellationToken);
     }
 }

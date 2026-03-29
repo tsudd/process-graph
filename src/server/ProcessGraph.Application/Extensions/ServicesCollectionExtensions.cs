@@ -1,6 +1,6 @@
-using FluentResults;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Mediator;
+using ProcessGraph.Application.Abstractions.Behaviors;
 
 namespace ProcessGraph.Application.Extensions;
 
@@ -10,8 +10,12 @@ public static class ServicesCollectionExtensions
     {
         services.AddMediator(options =>
         {
+            options.Assemblies = [typeof(ServicesCollectionExtensions).Assembly];
             options.ServiceLifetime = ServiceLifetime.Scoped;
+            options.PipelineBehaviors = [typeof(LoggingBehavior<,>), typeof(ValidationBehavior<,>)];
         });
+        
+        services.AddValidatorsFromAssembly(typeof(ServicesCollectionExtensions).Assembly);
 
         return services;
     }
