@@ -1,0 +1,15 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="compose.dev.yaml" />
+    <File Path="compose.yaml" />
+  </Folder>
+  <Project Path="ProcessGraph.API/ProcessGraph.API.csproj" />
+  <Project Path="ProcessGraph.Application/ProcessGraph.Application.csproj" />
+  <Project Path="ProcessGraph.Domain/ProcessGraph.Domain.csproj" />
+  <Project Path="ProcessGraph.Infrastructure/ProcessGraph.Infrastructure.csproj" />
+</Solution>
