@@ -1,6 +1,7 @@
 using ProcessGraph.Infrastructure.Extensions;
 using ProcessGraph.API.Endpoints;
 using ProcessGraph.API.Extensions;
+using ProcessGraph.API.Middleware;
 using ProcessGraph.Application.Extensions;
 using Scalar.AspNetCore;
 
@@ -23,6 +24,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapApiEndpoints();
 
