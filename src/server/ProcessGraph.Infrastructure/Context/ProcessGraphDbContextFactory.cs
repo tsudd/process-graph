@@ -9,7 +9,7 @@ public sealed class ProcessGraphDbContextFactory : IDesignTimeDbContextFactory<P
     {
         var optionsBuilder = new DbContextOptionsBuilder<ProcessGraphDbContext>();
 
-        // Default connection string for migrations - should be overridden in production
+        // Default connection string for migrations - should be overridden in productioc
         var connectionString = "Host=localhost;Database=ProcessGraphDb;Username=postgres;Password=postgres";
 
         optionsBuilder.UseNpgsql(connectionString,
