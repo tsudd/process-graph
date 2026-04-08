@@ -30,3 +30,8 @@ app.MapApiEndpoints();
 
 app.Run();
 
+/// <summary>
+/// Exposed for tests
+/// </summary>
+public partial class Program;
+

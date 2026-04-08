@@ -12,4 +12,6 @@
   <Project Path="ProcessGraph.Application/ProcessGraph.Application.csproj" />
   <Project Path="ProcessGraph.Domain/ProcessGraph.Domain.csproj" />
   <Project Path="ProcessGraph.Infrastructure/ProcessGraph.Infrastructure.csproj" />
+  <Project Path="ProcessGraph.Integration.Tests/ProcessGraph.Integration.Tests.csproj" />
+  <Project Path="ProcessGraph.Specs/ProcessGraph.Specs.csproj" />
 </Solution>
